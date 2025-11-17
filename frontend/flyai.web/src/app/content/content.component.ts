@@ -1,31 +1,33 @@
-import { Component, computed, inject } from '@angular/core';
-import { ButtonModule } from 'primeng/button';
-import { FormsModule } from '@angular/forms';
-import { StreamService } from '../services/stream.service';
+import {AfterViewInit, Component, inject} from '@angular/core';
+import {ButtonModule} from 'primeng/button';
+import {FormsModule} from '@angular/forms';
+import flvjs from 'flv.js';
+import {Skeleton} from 'primeng/skeleton';
 
 @Component({
   selector: 'app-content',
-  imports: [ButtonModule, FormsModule],
+  imports: [ButtonModule, FormsModule, Skeleton],
   templateUrl: './content.component.html',
 })
-export class ContentComponent {
-  protected readonly streamService = inject(StreamService);
-  protected readonly stream = computed(() => {
-    const streamInfos = this.streamService.getStreamInfo();
-    const streamUrls = this.streamService.getStreamUrls();
+export class ContentComponent implements AfterViewInit {
 
-    console.log('Stream Infos:', streamInfos);
-    console.log('Stream URLs:', streamUrls);
+  //ToDo: RTMP stream URL should be configurable
+  async initFlvPlayer() {
+    const streamUrl = 'http://localhost:8080/live/livestream.flv';
+    const videoElement = document.getElementById('liveVideo') as HTMLVideoElement;
+    if (streamUrl && flvjs.isSupported() && videoElement) {
+      const player = flvjs.createPlayer({
+        type: 'flv',
+        url: streamUrl
+      });
+      player.attachMediaElement(videoElement);
+      player.load();
+      player.play();
+    }
+  }
 
-    return {
-      infos: streamInfos,
-      urls: streamUrls,
-    };
-  });
-
-  onSubmit() {
-    const rtmp = '';
-    console.log('Submit button clicked with RTMP URL:', rtmp);
+  async ngAfterViewInit() {
+    await this.initFlvPlayer();
   }
 
   onCancel() {
