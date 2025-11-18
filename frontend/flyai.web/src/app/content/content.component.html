@@ -1,10 +1,6 @@
 <div class="w-[800px] h-full p-4 border border-gray-300 rounded shadow-md bg-white">
   <div class="flex m-5">
-    @defer (on viewport) {
-      <video id="liveVideo" width="100%" controls [muted]="true"></video>
-    } @placeholder {
-      <p-skeleton/>
-    }
+    <video id="liveVideo" width="100%" controls [muted]="true"></video>
   </div>
 
   <p-button
