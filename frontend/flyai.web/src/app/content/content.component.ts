@@ -14,7 +14,7 @@ export class ContentComponent implements AfterViewInit {
   private flvPlayer: flvjs.Player | null = null;
 
   // TODO: RTMP stream URL should be configurable
-  async initFlvPlayer() {
+  initFlvPlayer() {
     const streamUrl = 'http://localhost:8080/live/livestream.flv';
     const videoElement = document.getElementById('liveVideo') as HTMLVideoElement;
     if (streamUrl && flvjs.isSupported() && videoElement) {
