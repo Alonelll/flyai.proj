@@ -11,18 +11,25 @@ import {Skeleton} from 'primeng/skeleton';
 })
 export class ContentComponent implements AfterViewInit {
 
+  private flvPlayer: flvjs.Player | null = null;
+
   //ToDo: RTMP stream URL should be configurable
   async initFlvPlayer() {
     const streamUrl = 'http://localhost:8080/live/livestream.flv';
     const videoElement = document.getElementById('liveVideo') as HTMLVideoElement;
     if (streamUrl && flvjs.isSupported() && videoElement) {
-      const player = flvjs.createPlayer({
+      // Destroy previous player if exists
+      if (this.flvPlayer) {
+        this.flvPlayer.destroy();
+        this.flvPlayer = null;
+      }
+      this.flvPlayer = flvjs.createPlayer({
         type: 'flv',
         url: streamUrl
       });
-      player.attachMediaElement(videoElement);
-      player.load();
-      player.play();
+      this.flvPlayer.attachMediaElement(videoElement);
+      this.flvPlayer.load();
+      this.flvPlayer.play();
     }
   }
 
