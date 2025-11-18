@@ -1,21 +1,12 @@
 <div class="w-[800px] h-full p-4 border border-gray-300 rounded shadow-md bg-white">
-  <h1 class="text-2xl font-bold mb-4">Implement RTMP link</h1>
-  <!-- <div> -->
-  <!--   <input -->
-  <!--     type="text" -->
-  <!--     placeholder="Enter RTMP link here" -->
-  <!--     class="w-full p-2 border border-gray-300 rounded mb-4" -->
-  <!--     [(ngModel)]="rtmpLink" -->
-  <!--   /> -->
-  <!-- </div> -->
   <div class="flex m-5">
-    <video controls [src]="stream().urls" width="100%"></video>
+    <video id="liveVideo" width="100%" controls [muted]="true"></video>
   </div>
 
   <p-button
     class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-    label="Submit"
-    (click)="onSubmit()"
+    label="Reload"
+    (click)="initFlvPlayer()"
   />
 
   <p-button
