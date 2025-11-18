@@ -9,8 +9,19 @@ model = YOLO("yoloModels/rtdetr-x.pt")
 
 results = model.track('rtmp://localhost/live/livestream', stream=True, tracker="bytetrack.yaml")
 
-for result in results:
-    annotated_frame = result.plot()
-#     out.write(annotated_frame)
-#
-# out.release()
+import logging
+logging.basicConfig(level=logging.ERROR)
+
+try:
+    for result in results:
+        try:
+            annotated_frame = result.plot()
+#             out.write(annotated_frame)
+        except Exception as e:
+            logging.error(f"Error processing frame: {e}")
+            # Optionally, break or continue depending on desired behavior
+            continue
+# 
+#     out.release()
+except Exception as e:
+    logging.error(f"Error in streaming or model inference: {e}")
