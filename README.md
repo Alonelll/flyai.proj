@@ -10,7 +10,6 @@ Installiere die benötigten Tools via **Homebrew**:
 
 ```bash
 brew install automake libtool pkg-config cmake nasm yasm
-xcode-select --install  # falls noch nicht installiert
 ```
 
 ---
@@ -24,13 +23,13 @@ git clone https://github.com/ossrs/srs.git
 cd srs/trunk
 ```
 
-2. Configure ausführen:
+1. Configure ausführen:
 
 ```bash
 ./configure
 ```
 
-3. Kompilieren:
+1. Kompilieren:
 
 ```bash
 make
@@ -50,14 +49,14 @@ SRS bricht ab, wenn `max_connections` höher ist als das Systemlimit für offene
 [ERROR] max_connections=1000, system limit to 256, please run: ulimit -HSn 10000
 ```
 
-#### Temporär erhöhen:
+#### Temporär erhöhen
 
 ```bash
 ulimit -n 10240
 ./objs/srs -c conf/srs.conf
 ```
 
-#### Dauerhaft erhöhen:
+#### Dauerhaft erhöhen
 
 ```bash
 sudo launchctl limit maxfiles 10240 10240
@@ -143,7 +142,6 @@ docker run -it --rm -p 1935:1935 -p 1985:1985 -p 8080:8080 ossrs/srs:5
 ## 7. Troubleshooting macOS
 
 - **Kamera wird in OBS nicht erkannt:**
-
   - Prüfen: `system_profiler SPCameraDataType`
   - Datenschutzrechte: Systemeinstellungen → Datenschutz → Kamera → OBS zulassen
   - Dock / Kabel: Direkt am Mac anschließen, UVC-kompatibles Kabel verwenden

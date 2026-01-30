@@ -1,0 +1,18 @@
+# Python virtual env
+venv/
+.venv/
+env/
+ENV/
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# HLS / generated streaming output
+srs-www/**
+!srs-www/.gitkeep
+*.m3u8
+*.ts
+
+# optional: logs
+*.log

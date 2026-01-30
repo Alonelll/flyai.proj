@@ -1,43 +1,39 @@
-import {AfterViewInit, Component, inject} from '@angular/core';
-import {ButtonModule} from 'primeng/button';
-import {FormsModule} from '@angular/forms';
-import flvjs from 'flv.js';
-import {Skeleton} from 'primeng/skeleton';
+import { Component, ElementRef, effect, viewChild } from '@angular/core';
+import Hls from 'hls.js';
 
 @Component({
   selector: 'app-content',
-  imports: [ButtonModule, FormsModule, Skeleton],
   templateUrl: './content.component.html',
 })
-export class ContentComponent implements AfterViewInit {
+export class ContentComponent {
+  videoPlayer = viewChild('videoRef', { read: ElementRef<HTMLVideoElement> });
 
-  private flvPlayer: flvjs.Player | null = null;
+  constructor() {
+    effect((onCleanup) => {
+      const video = this.videoPlayer()?.nativeElement;
+      if (!video) return;
 
-  // TODO: RTMP stream URL should be configurable
-  initFlvPlayer() {
-    const streamUrl = 'http://localhost:8080/live/livestream.flv';
-    const videoElement = document.getElementById('liveVideo') as HTMLVideoElement;
-    if (streamUrl && flvjs.isSupported() && videoElement) {
-      // Destroy previous player if exists
-      if (this.flvPlayer) {
-        this.flvPlayer.destroy();
-        this.flvPlayer = null;
+      const url = '/live/output.m3u8';
+
+      if (Hls.isSupported()) {
+        const hls = new Hls({ liveSyncDurationCount: 3, liveMaxLatencyDurationCount: 6 });
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+        onCleanup(() => hls.destroy());
+        return;
       }
-      this.flvPlayer = flvjs.createPlayer({
-        type: 'flv',
-        url: streamUrl
-      });
-      this.flvPlayer.attachMediaElement(videoElement);
-      this.flvPlayer.load();
-      this.flvPlayer.play();
-    }
-  }
 
-  async ngAfterViewInit() {
-    await this.initFlvPlayer();
-  }
-
-  onCancel() {
-    console.log('Cancel button clicked');
+      // Check ob Browser HLS untersrtützt
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.onloadedmetadata = () => video.play();
+      } else {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+      }
+    });
   }
 }
