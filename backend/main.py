@@ -3,18 +3,17 @@ import subprocess
 import logging
 from ultralytics import YOLO
 import os
-from pathlib import Path
 
 # --- Configuration ---
-MODEL_PATH = "yoloModels/rtdetr-x.pt"
-INPUT_URL = "rtmp://localhost/live/livestream"
-OUTPUT_URL = "rtmp://localhost/live/output"
+MODEL_PATH = "yoloModels/yolov8n.pt"
+INPUT_URL = "rtmp://fnstream.westeurope.cloudapp.azure.com/live/kassim"
+OUTPUT_URL = "rtmp://fnstream.westeurope.cloudapp.azure.com/live/output"
 
-BASE_DIR = Path(__file__).resolve().parent
-HLS_DIR = BASE_DIR / "srs-www" / "live"
-HLS_DIR.mkdir(parents=True, exist_ok=True)
-HLS_OUTPUT = str(HLS_DIR / "output.m3u8")
-print("HLS_OUTPUT =", HLS_OUTPUT)
+# BASE_DIR = Path(__file__).resolve().parent
+# HLS_DIR = BASE_DIR / "srs-www" / "live"
+# HLS_DIR.mkdir(parents=True, exist_ok=True)
+# HLS_OUTPUT = str(HLS_DIR / "output.m3u8")
+# print("HLS_OUTPUT =", HLS_OUTPUT)
 # --- End Configuration ---
 
 
@@ -57,8 +56,8 @@ def main():
     # output RTMP URL.
     # ffmpeg_command ffmpeg_command = [
 
-    OUTPUT_FPS = 5
-    GOP = OUTPUT_FPS * 2  # 2 Sekunden
+    OUTPUT_FPS = 60
+    GOP = OUTPUT_FPS * 2  # 2 seconds
 
     ffmpeg_command = [
         "ffmpeg",
@@ -95,62 +94,9 @@ def main():
         "-sc_threshold",
         "0",
         "-f",
-        "hls",
-        "-hls_time",
-        "2",
-        "-hls_list_size",
-        "6",
-        "-hls_flags",
-        "delete_segments+append_list+omit_endlist",
-        "-hls_allow_cache",
-        "0",
-        "-hls_segment_filename",
-        str(HLS_DIR / "output%d.ts"),
-        str(HLS_OUTPUT),
+        "flv",
+        OUTPUT_URL,
     ]
-
-    # ffmpeg= [
-    #     "ffmpeg",
-    #     "-y",
-    #     "-f",
-    #     "rawvideo",
-    #     "-vcodec",
-    #     "rawvideo",
-    #     "-pix_fmt",
-    #     "bgr24",
-    #     "-s",
-    #     f"{width}x{height}",
-    #     "-r",
-    #     str(fps),
-    #     "-i",
-    #     "-",
-    #     "-c:v",
-    #     "libx264",
-    #     "-pix_fmt",
-    #     "yuv420p",
-    #     "-preset",
-    #     "medium",
-    #     "-tune",
-    #     "zerolatency",
-    #     "-profile:v",
-    #     "baseline",
-    #     # RTMP Output
-    #     "-f",
-    #     "flv",
-    #     OUTPUT_URL,
-    #     # HLS Output
-    #     "-c:v",
-    #     "libx264",
-    #     "-f",
-    #     "hls",
-    #     "-hls_time",
-    #     "2",
-    #     "-hls_list_size",
-    #     "5",
-    #     "-hls_flags",
-    #     "delete_segments",
-    #     "/usr/local/srs/objs/nginx/html/live/output.m3u8",
-    # ]
 
     # Start the FFmpeg subprocess
     try:

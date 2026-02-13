@@ -1,3 +1,10 @@
+Wichtig Docker irgendwie so Starten und das im backend/ verzeichnis
+
+docker run -it --rm \
+ -p 1935:1935 -p 1985:1985 -p 8080:8080 \
+ -v "$PWD/srs-www:/usr/local/srs/objs/nginx/html" \
+ ossrs/srs:5
+
 # OSSRS (SRS) Setup für macOS & Docker
 
 Diese README beschreibt, wie man **OSSRS (SRS)** lokal auf macOS baut, startet, typische macOS-Probleme löst und optional SRS über Docker betreibt.
