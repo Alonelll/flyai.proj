@@ -5,8 +5,4 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './navbar.component.html',
 })
-export class NavbarComponent {
-  onSubmit() {
-    console.log('Submit button clicked');
-  }
-}
+export class NavbarComponent {}

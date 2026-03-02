@@ -16,3 +16,6 @@ srs-www/**
 
 # optional: logs
 *.log
+
+*.pyre
+*.idea
