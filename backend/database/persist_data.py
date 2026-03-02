@@ -18,7 +18,7 @@ async def add_results(result):
             obb=result.obb,
         )
         try:
-            print(type(result))
+            print(result)
 
             session.add(result_dict)
             await session.flush()

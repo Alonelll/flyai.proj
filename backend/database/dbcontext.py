@@ -5,8 +5,11 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ToDo: Datenbank anlegen und URL anpassen
-DATABASE_URL = "postgresql+psycopg://ra7eem.@localhost:5432/fly_ai_db"
+# Mac URL
+# DATABASE_URL = "postgresql+psycopg://ra7eem.@localhost:5432/fly_ai_db"
+# windows URL
+DATABASE_URL = "postgresql+asyncpg://postgres:Test!1234@localhost:5433/fly_ai_db"
+
 engine = create_async_engine(DATABASE_URL, echo=True)
 
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)

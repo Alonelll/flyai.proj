@@ -1,15 +1,20 @@
-import { Component, ElementRef, effect, viewChild } from '@angular/core';
+import {Component, ElementRef, effect, viewChild, computed, inject} from '@angular/core';
 import FlvJs from 'flv.js';
-import Hls from 'hls.js';
+import {ObjectDefectsStore} from '../stores/object-defects.store';
 
 @Component({
   selector: 'app-content',
   templateUrl: './content.component.html',
 })
 export class ContentComponent {
-  videoPlayer = viewChild('videoRef', { read: ElementRef<HTMLVideoElement> });
+  videoPlayer = viewChild('videoRef', {read: ElementRef<HTMLVideoElement>});
+  private objectDefectsStore = inject(ObjectDefectsStore);
+  protected readonly detections = computed(() =>
+    this.objectDefectsStore.entities().filter(x => !!x.id)
+  );
 
   constructor() {
+    console.log(this.detections());
     effect((onCleanup) => {
       const flvPlayer = FlvJs.createPlayer({
         type: 'flv',
@@ -18,9 +23,12 @@ export class ContentComponent {
       flvPlayer.attachMediaElement(this.videoPlayer()?.nativeElement);
       flvPlayer.load();
       flvPlayer.play();
+      onCleanup(() => flvPlayer.destroy())
+      return;
     });
   }
 }
+
 // effect((onCleanup) => {
 
 //   const video = this.videoPlayer()?.nativeElement;
