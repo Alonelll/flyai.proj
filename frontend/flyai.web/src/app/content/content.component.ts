@@ -18,7 +18,7 @@ export class ContentComponent {
     effect((onCleanup) => {
       const flvPlayer = FlvJs.createPlayer({
         type: 'flv',
-        url: 'http://fnstream.westeurope.cloudapp.azure.com/live/output"',
+        url: 'http://fnstream.westeurope.cloudapp.azure.com:8080/live/output.flv',
       });
       flvPlayer.attachMediaElement(this.videoPlayer()?.nativeElement);
       flvPlayer.load();

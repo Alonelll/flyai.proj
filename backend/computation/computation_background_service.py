@@ -2,11 +2,10 @@ import cv2
 import asyncio
 import subprocess
 import logging
-from sqlalchemy.sql import false
 from ultralytics import YOLO
 import sys
 import os
-from database import persist_data
+from backend.database import persist_db_service
 
 # Project root path zu dem Skript hinzufügen, damit ich die Module importieren kann
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -14,10 +13,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # --- Configuration ---
 MODEL_PATH = "yoloModels/yolov8n.pt"
-# INPUT_URL = "rtmp://fnstream.westeurope.cloudapp.azure.com/live/kassim"
-# OUTPUT_URL = "rtmp://fnstream.westeurope.cloudapp.azure.com/live/output"
-INPUT_URL = "rtmp://localhost/live/livestream"
-OUTPUT_URL = "rtmp://localhost/live/output"
+INPUT_URL = "rtmp://fnstream.westeurope.cloudapp.azure.com/live/kassim"
+OUTPUT_URL = "rtmp://fnstream.westeurope.cloudapp.azure.com/live/output"
+# INPUT_URL = "rtmp://localhost/live/livestream"
+# OUTPUT_URL = "rtmp://localhost/live/output"
 
 
 async def main():
@@ -129,7 +128,7 @@ async def main():
 
             # Failed to write rresult to JSON file: 'Results' object has no attribute 'all'
             try:
-                await persist_data.add_results(result)
+                await persist_db_service.add_results(result)
                 logging.info("Successfully persisted data to database.")
             except Exception as e:
                 logging.error(f"Failed to persist data to database: {e}")

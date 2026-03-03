@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from api.router import router
-from database import dbcontext
+from backend.api.router_controller import router
 from contextlib import asynccontextmanager
+from backend.database import dbcontext
 
 
 # asynccontextmanager dekoriert die lifespan Funktion, damit sie als Kontextmanager verwendet werden kann.
