@@ -3,6 +3,7 @@ venv/
 .venv/
 env/
 ENV/
+.idea/
 
 # Python caches
 __pycache__/
@@ -19,3 +20,5 @@ srs-www/**
 
 *.pyre
 *.idea
+
+yoloModels/
