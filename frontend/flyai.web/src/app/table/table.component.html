@@ -1,0 +1,144 @@
+<div class="w-full">
+  <p-table
+    #dt
+    [value]="detections()"
+    [lazy]="true"
+    [loading]="loading()"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[5, 10, 20, 50]"
+    [globalFilterFields]="['id', 'model_name', 'source']"
+    dataKey="id"
+    responsiveLayout="scroll"
+    styleClass="p-datatable-striped"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 3rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th pSortableColumn="id" style="width: 6rem">
+          ID <p-sortIcon field="id"></p-sortIcon>
+        </th>
+        <th pSortableColumn="model_name">
+          Model <p-sortIcon field="model_name"></p-sortIcon>
+        </th>
+        <th pSortableColumn="source">
+          Source <p-sortIcon field="source"></p-sortIcon>
+        </th>
+        <th pSortableColumn="created_at" style="width: 12rem">
+          Created At <p-sortIcon field="created_at"></p-sortIcon>
+        </th>
+        <th style="width: 5rem">Boxes</th>
+        <th style="width: 5rem">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-detection>
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="detection"></p-tableCheckbox>
+        </td>
+        <td class="font-semibold">{{ detection.id }}</td>
+        <td>{{ detection.model_name || '—' }}</td>
+        <td class="text-sm text-slate-600">{{ detection.source || '—' }}</td>
+        <td class="text-sm">
+          {{ detection.created_at ? (detection.created_at | date: 'short') : '—' }}
+        </td>
+        <td class="text-center">
+          <span
+            class="inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800"
+          >
+            {{ detection.boxes?.length || 0 }}
+          </span>
+        </td>
+        <td>
+          <button
+            pButton
+            pRipple
+            type="button"
+            pIconButton
+            icon="pi pi-chevron-down"
+            [ngClass]="{ 'text-blue-600': isExpanded(detection) }"
+            (click)="toggleExpand(detection)"
+            class="rounded-lg border border-slate-200 hover:bg-slate-50"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="rowexpansion" let-detection>
+      <tr>
+        <td colspan="7" class="bg-slate-50 p-4">
+          <div class="mb-2">
+            <h4 class="mb-3 font-semibold text-slate-900">Detected Objects</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse text-sm">
+                <thead>
+                  <tr class="border-b border-slate-200 bg-slate-100">
+                    <th class="border border-slate-200 px-3 py-2 text-left">Box ID</th>
+                    <th class="border border-slate-200 px-3 py-2 text-left">Class</th>
+                    <th class="border border-slate-200 px-3 py-2 text-center">Confidence</th>
+                    <th class="border border-slate-200 px-3 py-2 text-center">X1</th>
+                    <th class="border border-slate-200 px-3 py-2 text-center">Y1</th>
+                    <th class="border border-slate-200 px-3 py-2 text-center">X2</th>
+                    <th class="border border-slate-200 px-3 py-2 text-center">Y2</th>
+                    <th class="border border-slate-200 px-3 py-2 text-center">Tracking ID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (box of detection.boxes; track box.id) {
+                    <tr class="border-b border-slate-200 hover:bg-slate-100">
+                      <td class="border border-slate-200 px-3 py-2 font-semibold">{{ box.id }}</td>
+                      <td class="border border-slate-200 px-3 py-2">
+                        <span class="rounded bg-indigo-100 px-2 py-1 text-xs font-semibold text-indigo-800">
+                          {{ box.class_name || box.class_id }}
+                        </span>
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2 text-center">
+                        <span
+                          class="inline-block rounded px-2 py-1 text-xs font-semibold"
+                          [class.bg-green-100]="box.confidence >= 0.8"
+                          [class.text-green-800]="box.confidence >= 0.8"
+                          [class.bg-yellow-100]="box.confidence >= 0.6 && box.confidence < 0.8"
+                          [class.text-yellow-800]="box.confidence >= 0.6 && box.confidence < 0.8"
+                          [class.bg-red-100]="box.confidence < 0.6"
+                          [class.text-red-800]="box.confidence < 0.6"
+                        >
+                          {{ (box.confidence * 100).toFixed(1) }}%
+                        </span>
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2 text-center">
+                        {{ box.x1.toFixed(2) }}
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2 text-center">
+                        {{ box.y1.toFixed(2) }}
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2 text-center">
+                        {{ box.x2.toFixed(2) }}
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2 text-center">
+                        {{ box.y2.toFixed(2) }}
+                      </td>
+                      <td class="border border-slate-200 px-3 py-2 text-center text-slate-500">
+                        {{ box.tracking_id || '—' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="py-8 text-center">
+          <p class="text-slate-500">No detection results found.</p>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
