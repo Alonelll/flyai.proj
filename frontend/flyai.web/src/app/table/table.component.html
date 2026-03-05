@@ -2,15 +2,14 @@
   <p-table
     #dt
     [value]="detections()"
-    [lazy]="true"
     [loading]="loading()"
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[5, 10, 20, 50]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
     [globalFilterFields]="['id', 'model_name', 'source']"
     dataKey="id"
-    responsiveLayout="scroll"
-    styleClass="p-datatable-striped"
   >
     <ng-template #header let-columns>
       <tr>
@@ -40,10 +39,10 @@
           <p-tableCheckbox [value]="detection" />
         </td>
         <td class="font-semibold">{{ detection.id }}</td>
-        <td>{{ detection.model_name || '—' }}</td>
+        <td>{{ detection.model_name || 'yolov8n' }}</td>
         <td class="text-sm text-slate-600">{{ detection.source || '—' }}</td>
         <td class="text-sm">
-          {{ detection.created_at ? (detection.created_at | date: 'short') : '—' }}
+          {{ detection.created_at ? (detection.created_at | date: 'dd.MM.yyyy') : '—' }}
         </td>
         <td class="text-center">
           <span
@@ -56,9 +55,8 @@
           <p-button
             pRipple
             type="button"
+            [pRowToggler]="detection"
             icon="pi pi-chevron-down"
-            [ngClass]="{ 'text-blue-600': isExpanded(detection) }"
-            (click)="toggleExpand(detection)"
             class="rounded-lg border border-slate-200 hover:bg-slate-50"
           ></p-button>
         </td>

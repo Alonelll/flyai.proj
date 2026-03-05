@@ -7,6 +7,11 @@ export const routes: Routes = [
       import('./content/content.component').then((m) => m.ContentComponent),
   },
   {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./dashboard/dashboard.component').then((m) => m.DashboardComponent),
+  },
+  {
     path: 'table-results',
     loadComponent: () => import('./table/table.component').then((m) => m.TableComponent),
   },

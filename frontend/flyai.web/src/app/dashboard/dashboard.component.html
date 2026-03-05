@@ -1,0 +1,170 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+  <div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="mb-2 text-4xl font-bold text-slate-900">Erkennungs-Dashboard</h1>
+      <p class="text-slate-600">Übersicht der Erkennungsanalysen</p>
+    </div>
+
+    @if (error()) {
+      <p-message
+        severity="error"
+        [text]="'Fehler beim Laden der Zusammenfassung: ' + error()"
+        styleClass="w-full mb-6"
+      ></p-message>
+    }
+
+    @if (loading()) {
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <p-card styleClass="shadow-lg">
+            <p-skeleton height="2rem" styleClass="mb-2"></p-skeleton>
+            <p-skeleton width="10rem" height="3rem"></p-skeleton>
+          </p-card>
+        }
+      </div>
+    } @else if (summary()) {
+      <!-- Stats Cards -->
+      <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <!-- Total Results Card -->
+        <p-card styleClass="shadow-lg border-l-4 border-blue-500 hover:shadow-xl transition-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="mb-2 text-sm font-medium text-slate-600">Gesamtergebnisse</p>
+              <p class="text-4xl font-bold text-blue-600">{{ summary()!.total_results }}</p>
+            </div>
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100">
+              <i class="pi pi-box text-2xl text-blue-600"></i>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Total Detections Card -->
+        <p-card styleClass="shadow-lg border-l-4 border-indigo-500 hover:shadow-xl transition-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="mb-2 text-sm font-medium text-slate-600">Gesamterkennungen</p>
+              <p class="text-4xl font-bold text-indigo-600">{{ summary()!.total_detections }}</p>
+            </div>
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100">
+              <i class="pi pi-eye text-2xl text-indigo-600"></i>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Average Confidence Card -->
+        <p-card [styleClass]="'shadow-lg border-l-4 border-' + (summary()!.average_confidence >= 0.8 ? 'green' : summary()!.average_confidence >= 0.6 ? 'yellow' : 'red') + '-500 hover:shadow-xl transition-shadow ' + confidenceBgColor()">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="mb-2 text-sm font-medium text-slate-600">Durchschn. Vertrauen</p>
+              <p class="text-4xl font-bold" [class]="confidenceColor()">
+                {{ averageConfidencePercentage() }}%
+              </p>
+            </div>
+            <div class="flex h-14 w-14 items-center justify-center rounded-full"
+                 [class]="summary()!.average_confidence >= 0.8 ? 'bg-green-100' : summary()!.average_confidence >= 0.6 ? 'bg-yellow-100' : 'bg-red-100'">
+              <i class="pi pi-chart-line text-2xl"
+                 [class]="confidenceColor()"></i>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Unique Classes Card -->
+        <p-card styleClass="shadow-lg border-l-4 border-purple-500 hover:shadow-xl transition-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="mb-2 text-sm font-medium text-slate-600">Einzigartige Klassen</p>
+              <p class="text-4xl font-bold text-purple-600">{{ summary()!.unique_classes.length }}</p>
+            </div>
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-purple-100">
+              <i class="pi pi-tags text-2xl text-purple-600"></i>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Confidence Gauge Chart -->
+        <p-card styleClass="shadow-lg">
+          <ng-template pTemplate="header">
+            <div class="border-b border-slate-200 p-6">
+              <h2 class="text-xl font-semibold text-slate-900">
+                <i class="pi pi-gauge mr-2 text-slate-600"></i>
+                Confidence (in Ø)
+              </h2>
+              <p class="mt-1 text-sm text-slate-600">Gesamte Erkennungsconfidence</p>
+            </div>
+          </ng-template>
+          <div class="relative flex flex-col items-center justify-center py-8">
+            <div style="height: 250px; width: 100%; max-width: 400px;">
+              <p-chart type="doughnut" [data]="confidenceGaugeData()" [options]="gaugeOptions"></p-chart>
+            </div>
+            <div class="absolute inset-0 flex flex-col items-center justify-center" style="margin-top: 80px;">
+              <p class="text-5xl font-bold" [class]="confidenceColor()">
+                {{ averageConfidencePercentage() }}%
+              </p>
+              <p class="mt-2 text-sm font-medium text-slate-600">Durchschnittswert</p>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Class Distribution Chart -->
+        @if (summary()!.unique_classes.length > 0) {
+          <p-card styleClass="shadow-lg">
+            <ng-template pTemplate="header">
+              <div class="border-b border-slate-200 p-6">
+                <h2 class="text-xl font-semibold text-slate-900">
+                  <i class="pi pi-chart-bar mr-2 text-slate-600"></i>
+                  Klassenverteilung
+                </h2>
+                <p class="mt-1 text-sm text-slate-600">Erkannte Objektklassen</p>
+              </div>
+            </ng-template>
+            <div style="height: 300px;">
+              <p-chart type="bar" [data]="chartData()" [options]="chartOptions"></p-chart>
+            </div>
+          </p-card>
+        }
+      </div>
+
+      <!-- Classes List -->
+      @if (summary()!.unique_classes.length > 0) {
+        <div>
+          <p-card styleClass="shadow-lg">
+            <ng-template pTemplate="header">
+              <div class="border-b border-slate-200 p-6">
+                <h2 class="flex items-center text-xl font-semibold text-slate-900">
+                  <i class="pi pi-list mr-2 text-slate-600"></i>
+                  Alle erkannten Klassen
+                  <span class="ml-2 rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-800">
+                    {{ summary()!.unique_classes.length }}
+                  </span>
+                </h2>
+              </div>
+            </ng-template>
+            <div class="flex flex-wrap gap-3">
+              @for (className of summary()!.unique_classes; track className; let idx = $index) {
+                <p-chip
+                  [label]="className"
+                  [styleClass]="'text-white ' + [
+                    'bg-indigo-500',
+                    'bg-blue-500',
+                    'bg-purple-500',
+                    'bg-pink-500',
+                    'bg-orange-500',
+                    'bg-yellow-500',
+                    'bg-green-500',
+                    'bg-teal-500'
+                  ][idx % 8]"
+                  [style]="{ fontSize: '0.875rem', fontWeight: '600' }"
+                ></p-chip>
+              }
+            </div>
+          </p-card>
+        </div>
+      }
+    }
+  </div>
+</div>
+

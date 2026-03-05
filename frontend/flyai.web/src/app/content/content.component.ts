@@ -18,17 +18,21 @@ export class ContentComponent {
     this.objectDefectsStore.entities().filter((x) => !!x.id),
   );
 
-  protected readonly isVideoAvailable = signal<boolean>(false);
+  protected readonly isVideoAvailable = signal(true);
   protected readonly videoError = signal<string | null>(null);
 
   constructor() {
-    console.log(this.detections())
+    console.log(this.detections());
     effect((onCleanup) => {
       const videoElement = this.videoPlayer()?.nativeElement;
 
       if (!videoElement) {
+        return;
+      }
+
+      if (!FlvJs.isSupported()) {
         this.isVideoAvailable.set(false);
-        this.videoError.set('Video player element not found');
+        this.videoError.set('Video playback is not supported in this browser');
         return;
       }
 
@@ -67,33 +71,3 @@ export class ContentComponent {
     });
   }
 }
-
-// effect((onCleanup) => {
-
-//   const video = this.videoPlayer()?.nativeElement;
-//   console.log(video);
-//
-//   if (!video) return;
-//
-//   const url = '/live/output.m3u8';
-//
-//   if (Hls.isSupported()) {
-//     const hls = new Hls({ liveSyncDurationCount: 3, liveMaxLatencyDurationCount: 6 });
-//     hls.loadSource(url);
-//     hls.attachMedia(video);
-//     hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-//     onCleanup(() => hls.destroy());
-//     return;
-//   }
-//
-//   // Check ob Browser HLS untersrtützt
-//   if (video.canPlayType('application/vnd.apple.mpegurl')) {
-//     video.src = url;
-//     video.onloadedmetadata = () => video.play();
-//   } else {
-//     const hls = new Hls();
-//     hls.loadSource(url);
-//     hls.attachMedia(video);
-//     hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-//   }
-// });
