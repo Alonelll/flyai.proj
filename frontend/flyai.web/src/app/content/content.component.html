@@ -1,9 +1,29 @@
-<div class="video-container">
-  @defer {
-    <video #videoRef controls muted autoplay playsinline></video>
-  } @error {
-    <div class="error-message">
-      <p>Error loading video content. Please try again later.</p>
+<div class="w-full">
+  @if (videoError()) {
+    <div class="mb-4">
+      <p-message
+        severity="error"
+        [text]="videoError() || 'Error loading video content. Please try again later.'"
+        styleClass="w-full"
+      ></p-message>
     </div>
   }
+
+  <div class="video-container">
+    @if (isVideoAvailable()) {
+      @defer {
+        <video #videoRef controls muted autoplay playsinline></video>
+      } @error {
+        <div class="error-message">
+          <p>Error loading video content. Please try again later.</p>
+        </div>
+      }
+    } @else {
+      <p-message
+        severity="warn"
+        text="Serververbindung verloren oder Stream Offline"
+        styleClass="w-full"
+      ></p-message>
+    }
+  </div>
 </div>

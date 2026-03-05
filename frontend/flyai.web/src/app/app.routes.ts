@@ -1,9 +1,14 @@
 import { Routes } from '@angular/router';
-import { NavbarComponent } from './navbar/navbar.component';
 
 export const routes: Routes = [
-  { path: '', component: NavbarComponent }, // Default route
-  // { path: 'about', component: AboutComponent },
-  // { path: 'contact', component: ContactComponent },
-  { path: '**', redirectTo: '' }, // Wildcard route for unmatched paths];
+  {
+    path: '',
+    loadComponent: () =>
+      import('./content/content.component').then((m) => m.ContentComponent),
+  },
+  {
+    path: 'table-results',
+    loadComponent: () => import('./table/table.component').then((m) => m.TableComponent),
+  },
+  { path: '**', redirectTo: '' },
 ];

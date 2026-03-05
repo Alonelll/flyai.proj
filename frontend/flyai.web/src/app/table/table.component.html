@@ -12,32 +12,32 @@
     responsiveLayout="scroll"
     styleClass="p-datatable-striped"
   >
-    <ng-template pTemplate="header">
+    <ng-template #header let-columns>
       <tr>
         <th style="width: 3rem">
-          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          <p-tableHeaderCheckbox />
         </th>
         <th pSortableColumn="id" style="width: 6rem">
-          ID <p-sortIcon field="id"></p-sortIcon>
+          ID <p-sortIcon field="id" />
         </th>
         <th pSortableColumn="model_name">
-          Model <p-sortIcon field="model_name"></p-sortIcon>
+          Model <p-sortIcon field="model_name" />
         </th>
         <th pSortableColumn="source">
-          Source <p-sortIcon field="source"></p-sortIcon>
+          Source <p-sortIcon field="source" />
         </th>
         <th pSortableColumn="created_at" style="width: 12rem">
-          Created At <p-sortIcon field="created_at"></p-sortIcon>
+          Created At <p-sortIcon field="created_at" />
         </th>
         <th style="width: 5rem">Boxes</th>
         <th style="width: 5rem">Actions</th>
       </tr>
     </ng-template>
 
-    <ng-template pTemplate="body" let-detection>
+    <ng-template #body let-detection>
       <tr>
         <td>
-          <p-tableCheckbox [value]="detection"></p-tableCheckbox>
+          <p-tableCheckbox [value]="detection" />
         </td>
         <td class="font-semibold">{{ detection.id }}</td>
         <td>{{ detection.model_name || '—' }}</td>
@@ -53,16 +53,14 @@
           </span>
         </td>
         <td>
-          <button
-            pButton
+          <p-button
             pRipple
             type="button"
-            pIconButton
             icon="pi pi-chevron-down"
             [ngClass]="{ 'text-blue-600': isExpanded(detection) }"
             (click)="toggleExpand(detection)"
             class="rounded-lg border border-slate-200 hover:bg-slate-50"
-          ></button>
+          ></p-button>
         </td>
       </tr>
     </ng-template>
@@ -73,7 +71,9 @@
           <div class="mb-2">
             <h4 class="mb-3 font-semibold text-slate-900">Detected Objects</h4>
             <div class="overflow-x-auto">
-              <table class="w-full border-collapse text-sm">
+              <table
+                class="w-full border-collapse text-sm"
+              >
                 <thead>
                   <tr class="border-b border-slate-200 bg-slate-100">
                     <th class="border border-slate-200 px-3 py-2 text-left">Box ID</th>

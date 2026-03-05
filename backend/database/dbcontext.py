@@ -6,9 +6,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Mac URL
-DATABASE_URL = "postgresql+psycopg://ra7eem.@localhost:5432/fly_ai_db"
+# DATABASE_URL = "postgresql+psycopg://ra7eem.@localhost:5432/fly_ai_db"
 # windows URL
-# DATABASE_URL = "postgresql+asyncpg://postgres:Test!1234@localhost:5433/fly_ai_db"
+DATABASE_URL = "postgresql+asyncpg://postgres:Test!1234@localhost:5433/fly_ai_db"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 

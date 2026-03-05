@@ -1,10 +1,15 @@
-import { Component, ElementRef, effect, viewChild, computed, inject } from '@angular/core';
+import { Component, ElementRef, effect, viewChild, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MessageModule } from 'primeng/message';
 import FlvJs from 'flv.js';
 import { ObjectDefectsStore } from '../stores/object-defects.store';
 
 @Component({
   selector: 'app-content',
+  standalone: true,
+  imports: [CommonModule, MessageModule],
   templateUrl: './content.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContentComponent {
   videoPlayer = viewChild('videoRef', { read: ElementRef<HTMLVideoElement> });
@@ -13,19 +18,52 @@ export class ContentComponent {
     this.objectDefectsStore.entities().filter((x) => !!x.id),
   );
 
-  // ToDo: improve stream quality
+  protected readonly isVideoAvailable = signal<boolean>(false);
+  protected readonly videoError = signal<string | null>(null);
+
   constructor() {
-    console.log(this.detections());
+    console.log(this.detections())
     effect((onCleanup) => {
-      const flvPlayer = FlvJs.createPlayer({
-        type: 'flv',
-        url: 'http://fnstream.westeurope.cloudapp.azure.com:8080/live/output.flv',
-      });
-      flvPlayer.attachMediaElement(this.videoPlayer()?.nativeElement);
-      flvPlayer.load();
-      flvPlayer.play();
-      onCleanup(() => flvPlayer.destroy());
-      return;
+      const videoElement = this.videoPlayer()?.nativeElement;
+
+      if (!videoElement) {
+        this.isVideoAvailable.set(false);
+        this.videoError.set('Video player element not found');
+        return;
+      }
+
+      this.isVideoAvailable.set(true);
+      this.videoError.set(null);
+
+      try {
+        const flvPlayer = FlvJs.createPlayer({
+          type: 'flv',
+          url: 'http://fnstream.westeurope.cloudapp.azure.com:8080/live/output.flv',
+        });
+
+        flvPlayer.attachMediaElement(videoElement);
+        flvPlayer.load();
+        const playResult = flvPlayer.play();
+        if (playResult instanceof Promise) {
+          playResult.catch((error: unknown) => {
+            console.error('Error playing video:', error);
+            this.videoError.set('Serververbindung verloren oder Stream Offline');
+            this.isVideoAvailable.set(false);
+          });
+        }
+
+        onCleanup(() => {
+          try {
+            flvPlayer.destroy();
+          } catch (error) {
+            console.error('Error destroying FLV player:', error);
+          }
+        });
+      } catch (error) {
+        console.error('Error initializing FLV player:', error);
+        this.videoError.set('Serververbindung verloren oder Stream Offline');
+        this.isVideoAvailable.set(false);
+      }
     });
   }
 }
