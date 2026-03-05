@@ -1,18 +1,19 @@
-import {Component, ElementRef, effect, viewChild, computed, inject} from '@angular/core';
+import { Component, ElementRef, effect, viewChild, computed, inject } from '@angular/core';
 import FlvJs from 'flv.js';
-import {ObjectDefectsStore} from '../stores/object-defects.store';
+import { ObjectDefectsStore } from '../stores/object-defects.store';
 
 @Component({
   selector: 'app-content',
   templateUrl: './content.component.html',
 })
 export class ContentComponent {
-  videoPlayer = viewChild('videoRef', {read: ElementRef<HTMLVideoElement>});
+  videoPlayer = viewChild('videoRef', { read: ElementRef<HTMLVideoElement> });
   private objectDefectsStore = inject(ObjectDefectsStore);
   protected readonly detections = computed(() =>
-    this.objectDefectsStore.entities().filter(x => !!x.id)
+    this.objectDefectsStore.entities().filter((x) => !!x.id),
   );
 
+  // ToDo: improve stream quality
   constructor() {
     console.log(this.detections());
     effect((onCleanup) => {
@@ -23,7 +24,7 @@ export class ContentComponent {
       flvPlayer.attachMediaElement(this.videoPlayer()?.nativeElement);
       flvPlayer.load();
       flvPlayer.play();
-      onCleanup(() => flvPlayer.destroy())
+      onCleanup(() => flvPlayer.destroy());
       return;
     });
   }
