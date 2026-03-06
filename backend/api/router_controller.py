@@ -24,11 +24,11 @@ async def get_detection(result_id: int):
 @router.get("/results", response_model=List[ExpectedResultResponse])
 async def get_all_detections(
     skip: int = Query(0, ge=0, description="Anzahl überspringender Einträge"),
-    limit: int = Query(10, ge=1, le=100, description="Maximale Anzahl Ergebnisse"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximale Anzahl Ergebnisse"),
     source: Optional[str] = Query(None, description="Filter nach Source"),
     model_name: Optional[str] = Query(None, description="Filter nach Model Name"),
 ):
-    """Fetch alle Detection Results mit Pagination und optionalen Filtern"""
+    """Fetch alle Detection Results mit Pagination und optionalen Filtern - sortiert nach neuesten zuerst"""
     detections = await DetectionResultService.get_all_results(
         skip=skip, limit=limit, source=source, model_name=model_name
     )
@@ -40,9 +40,9 @@ async def get_all_detections(
 async def get_detections_by_class(
     class_id: int,
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=1000),
 ):
-    """Fetch alle Detection Results mit einer bestimmten Klasse"""
+    # Fetch alle Detection Results mit einer bestimmten Klasse
     detections = await DetectionResultService.get_results_by_class(
         class_id=class_id, skip=skip, limit=limit
     )
@@ -54,9 +54,9 @@ async def get_detections_by_class(
 async def get_high_confidence_detections(
     min_confidence: float = Query(0.8, ge=0.0, le=1.0, description="Minimales Confidence Level"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=1000),
 ):
-    """Fetch Detection Results mit hohem Confidence Level"""
+    # Fetch Detection Results mit hohem Confidence Level
     detections = await DetectionResultService.get_high_confidence_results(
         min_confidence=min_confidence, skip=skip, limit=limit
     )
@@ -67,7 +67,7 @@ async def get_high_confidence_detections(
 # ===== Summary & Analytics Endpoints =====
 @router.get("/summary", response_model=DetectionSummary)
 async def get_detection_summary():
-    """Fetch zusammenfasste Statistiken aller Detektionen"""
+    # Fetch zusammenfasste Statistiken aller Detektionen
     total_results = await DetectionResultService.get_total_count()
     avg_confidence = await DetectionResultService.get_average_confidence()
     unique_classes = await DetectionResultService.get_unique_classes()

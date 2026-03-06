@@ -26,11 +26,11 @@ class DetectionResultService:
     @staticmethod
     async def get_all_results(
         skip: int = 0,
-        limit: int = 10,
+        limit: int = 100,
         source: Optional[str] = None,
         model_name: Optional[str] = None,
     ) -> List[ExpectedResult]:
-        """Hole alle Detection Results mit optionalen Filtern"""
+        """Hole alle Detection Results mit optionalen Filtern - sortiert nach created_at (neueste zuerst)"""
         async with AsyncSessionLocal() as session:
             query = select(ExpectedResult).options(selectinload(ExpectedResult.boxes))
 
@@ -39,7 +39,8 @@ class DetectionResultService:
             if model_name:
                 query = query.where(ExpectedResult.model_name == model_name)
 
-            query = query.order_by(desc(ExpectedResult.created_at)).offset(skip).limit(limit)
+            # Sortierung: created_at DESC (neueste zuerst), dann ID DESC als Fallback
+            query = query.order_by(desc(ExpectedResult.created_at), desc(ExpectedResult.id)).offset(skip).limit(limit)
             result = await session.execute(query)
             return result.scalars().all()
 
@@ -47,9 +48,9 @@ class DetectionResultService:
     async def get_results_by_class(
         class_id: int,
         skip: int = 0,
-        limit: int = 10,
+        limit: int = 100,
     ) -> List[ExpectedResult]:
-        """Hole alle Detection Results mit einer bestimmten Klasse"""
+        """Hole alle Detection Results mit einer bestimmten Klasse - sortiert nach created_at (neueste zuerst)"""
         async with AsyncSessionLocal() as session:
             query = (
                 select(ExpectedResult)
@@ -57,7 +58,7 @@ class DetectionResultService:
                 .join(BoxModel)
                 .where(BoxModel.class_id == class_id)
                 .distinct()
-                .order_by(desc(ExpectedResult.created_at))
+                .order_by(desc(ExpectedResult.created_at), desc(ExpectedResult.id))
                 .offset(skip)
                 .limit(limit)
             )
@@ -68,9 +69,9 @@ class DetectionResultService:
     async def get_high_confidence_results(
         min_confidence: float = 0.8,
         skip: int = 0,
-        limit: int = 10,
+        limit: int = 100,
     ) -> List[ExpectedResult]:
-        """Hole Detection Results mit hohem Confidence"""
+        """Hole Detection Results mit hohem Confidence - sortiert nach created_at (neueste zuerst)"""
         async with AsyncSessionLocal() as session:
             query = (
                 select(ExpectedResult)
@@ -78,7 +79,7 @@ class DetectionResultService:
                 .join(BoxModel)
                 .where(BoxModel.confidence >= min_confidence)
                 .distinct()
-                .order_by(desc(ExpectedResult.created_at))
+                .order_by(desc(ExpectedResult.created_at), desc(ExpectedResult.id))
                 .offset(skip)
                 .limit(limit)
             )

@@ -7,37 +7,59 @@
     [rows]="10"
     [rowsPerPageOptions]="[5, 10, 20, 50]"
     [showCurrentPageReport]="true"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+    currentPageReportTemplate="Zeige {first} bis {last} von {totalRecords}"
     [globalFilterFields]="['id', 'model_name', 'source']"
     dataKey="id"
+    [expandedRowKeys]="expandedRowKeys()"
+
   >
-    <ng-template #header let-columns>
+    <ng-template #header>
       <tr>
+        <th style="width: 3rem"></th>
+<!--
         <th style="width: 3rem">
-          <p-tableHeaderCheckbox />
+          <p-tableHeaderCheckbox/>
         </th>
+-->
         <th pSortableColumn="id" style="width: 6rem">
-          ID <p-sortIcon field="id" />
+          ID
+          <p-sortIcon field="id"/>
         </th>
         <th pSortableColumn="model_name">
-          Model <p-sortIcon field="model_name" />
+          Modell
+          <p-sortIcon field="model_name"/>
         </th>
         <th pSortableColumn="source">
-          Source <p-sortIcon field="source" />
+          Quelle
+          <p-sortIcon field="source"/>
         </th>
         <th pSortableColumn="created_at" style="width: 12rem">
-          Created At <p-sortIcon field="created_at" />
+          Erstellt am
+          <p-sortIcon field="created_at"/>
         </th>
-        <th style="width: 5rem">Boxes</th>
-        <th style="width: 5rem">Actions</th>
+        <th style="width: 5rem">Boxen</th>
       </tr>
     </ng-template>
 
     <ng-template #body let-detection>
       <tr>
         <td>
-          <p-tableCheckbox [value]="detection" />
+          <p-button
+            pRowToggler
+            type="button"
+            (onClick)="toggleRow(detection)"
+            [text]="true"
+            [rounded]="true"
+            [plain]="true"
+            [icon]="isExpanded(detection) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+            styleClass="p-button-sm"
+          />
         </td>
+<!--
+        <td>
+          <p-tableCheckbox [value]="detection"/>
+        </td>
+-->
         <td class="font-semibold">{{ detection.id }}</td>
         <td>{{ detection.model_name || 'yolov8n' }}</td>
         <td class="text-sm text-slate-600">{{ detection.source || '—' }}</td>
@@ -51,90 +73,84 @@
             {{ detection.boxes?.length || 0 }}
           </span>
         </td>
-        <td>
-          <p-button
-            pRipple
-            type="button"
-            [pRowToggler]="detection"
-            icon="pi pi-chevron-down"
-            class="rounded-lg border border-slate-200 hover:bg-slate-50"
-          ></p-button>
-        </td>
       </tr>
-    </ng-template>
-
-    <ng-template pTemplate="rowexpansion" let-detection>
-      <tr>
-        <td colspan="7" class="bg-slate-50 p-4">
-          <div class="mb-2">
-            <h4 class="mb-3 font-semibold text-slate-900">Detected Objects</h4>
-            <div class="overflow-x-auto">
-              <table
-                class="w-full border-collapse text-sm"
+      @if (isExpanded(detection)) {
+        <tr>
+          <td colspan="7" class="bg-slate-50 p-4">
+            <div class="mb-2">
+              <h4 class="mb-3 font-semibold text-slate-900">Erkannte Objekte</h4>
+              <p-table
+                [value]="detection.boxes"
+                dataKey="id"
               >
-                <thead>
-                  <tr class="border-b border-slate-200 bg-slate-100">
-                    <th class="border border-slate-200 px-3 py-2 text-left">Box ID</th>
-                    <th class="border border-slate-200 px-3 py-2 text-left">Class</th>
-                    <th class="border border-slate-200 px-3 py-2 text-center">Confidence</th>
-                    <th class="border border-slate-200 px-3 py-2 text-center">X1</th>
-                    <th class="border border-slate-200 px-3 py-2 text-center">Y1</th>
-                    <th class="border border-slate-200 px-3 py-2 text-center">X2</th>
-                    <th class="border border-slate-200 px-3 py-2 text-center">Y2</th>
-                    <th class="border border-slate-200 px-3 py-2 text-center">Tracking ID</th>
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th class="text-left">Box ID</th>
+                    <th class="text-left">Klasse</th>
+                    <th class="text-center">Vertrauen</th>
+                    <th class="text-center">X1</th>
+                    <th class="text-center">Y1</th>
+                    <th class="text-center">X2</th>
+                    <th class="text-center">Y2</th>
+                    <th class="text-center">Tracking ID</th>
                   </tr>
-                </thead>
-                <tbody>
-                  @for (box of detection.boxes; track box.id) {
-                    <tr class="border-b border-slate-200 hover:bg-slate-100">
-                      <td class="border border-slate-200 px-3 py-2 font-semibold">{{ box.id }}</td>
-                      <td class="border border-slate-200 px-3 py-2">
-                        <span class="rounded bg-indigo-100 px-2 py-1 text-xs font-semibold text-indigo-800">
-                          {{ box.class_name || box.class_id }}
-                        </span>
-                      </td>
-                      <td class="border border-slate-200 px-3 py-2 text-center">
-                        <span
-                          class="inline-block rounded px-2 py-1 text-xs font-semibold"
-                          [class.bg-green-100]="box.confidence >= 0.8"
-                          [class.text-green-800]="box.confidence >= 0.8"
-                          [class.bg-yellow-100]="box.confidence >= 0.6 && box.confidence < 0.8"
-                          [class.text-yellow-800]="box.confidence >= 0.6 && box.confidence < 0.8"
-                          [class.bg-red-100]="box.confidence < 0.6"
-                          [class.text-red-800]="box.confidence < 0.6"
-                        >
-                          {{ (box.confidence * 100).toFixed(1) }}%
-                        </span>
-                      </td>
-                      <td class="border border-slate-200 px-3 py-2 text-center">
-                        {{ box.x1.toFixed(2) }}
-                      </td>
-                      <td class="border border-slate-200 px-3 py-2 text-center">
-                        {{ box.y1.toFixed(2) }}
-                      </td>
-                      <td class="border border-slate-200 px-3 py-2 text-center">
-                        {{ box.x2.toFixed(2) }}
-                      </td>
-                      <td class="border border-slate-200 px-3 py-2 text-center">
-                        {{ box.y2.toFixed(2) }}
-                      </td>
-                      <td class="border border-slate-200 px-3 py-2 text-center text-slate-500">
-                        {{ box.tracking_id || '—' }}
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+                </ng-template>
+                <ng-template pTemplate="body" let-box>
+                  <tr>
+                    <td class="font-semibold">{{ box.id }}</td>
+                    <td>
+                      <span class="rounded bg-indigo-100 px-2 py-1 text-xs font-semibold text-indigo-800">
+                        {{ box.class_name || box.class_id }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <span
+                        class="inline-block rounded px-2 py-1 text-xs font-semibold"
+                        [class.bg-green-100]="box.confidence >= 0.8"
+                        [class.text-green-800]="box.confidence >= 0.8"
+                        [class.bg-yellow-100]="box.confidence >= 0.6 && box.confidence < 0.8"
+                        [class.text-yellow-800]="box.confidence >= 0.6 && box.confidence < 0.8"
+                        [class.bg-red-100]="box.confidence < 0.6"
+                        [class.text-red-800]="box.confidence < 0.6"
+                      >
+                        {{ (box.confidence * 100).toFixed(1) }}%
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      {{ box.x1.toFixed(2) }}
+                    </td>
+                    <td class="text-center">
+                      {{ box.y1.toFixed(2) }}
+                    </td>
+                    <td class="text-center">
+                      {{ box.x2.toFixed(2) }}
+                    </td>
+                    <td class="text-center">
+                      {{ box.y2.toFixed(2) }}
+                    </td>
+                    <td class="text-center text-slate-500">
+                      {{ box.tracking_id || '—' }}
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td colspan="8" class="py-4 text-center">
+                      <p class="text-slate-500">Keine Boxen gefunden.</p>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
             </div>
-          </div>
-        </td>
-      </tr>
+          </td>
+        </tr>
+      }
     </ng-template>
 
     <ng-template pTemplate="emptymessage">
       <tr>
         <td colspan="7" class="py-8 text-center">
-          <p class="text-slate-500">No detection results found.</p>
+          <p class="text-slate-500">Keine Erkennungsergebnisse gefunden.</p>
         </td>
       </tr>
     </ng-template>

@@ -22,7 +22,6 @@ export class ContentComponent {
   protected readonly videoError = signal<string | null>(null);
 
   constructor() {
-    console.log(this.detections());
     effect((onCleanup) => {
       const videoElement = this.videoPlayer()?.nativeElement;
 
@@ -49,7 +48,7 @@ export class ContentComponent {
         flvPlayer.load();
         const playResult = flvPlayer.play();
         if (playResult instanceof Promise) {
-          playResult.catch((error: unknown) => {
+          playResult.catch((error ) => {
             console.error('Error playing video:', error);
             this.videoError.set('Serververbindung verloren oder Stream Offline');
             this.isVideoAvailable.set(false);
